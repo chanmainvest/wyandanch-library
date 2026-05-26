@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { allItems, getItemBySlug, getAdjacentItems } from '@/lib/curriculum';
 import { ArticleLayout } from '@/components/ArticleLayout';
 import { ArticleComingSoon } from '@/components/ArticleComingSoon';
+import { LocalizedMDX } from '@/components/LocalizedMDX';
 import { mdxComponents } from '@/components/MDXComponents';
 import { loadMDXContent } from '@/lib/mdx-map';
 
@@ -50,9 +51,11 @@ export default async function ReadPage({ params }: { params: { slug: string } })
     );
   }
 
+  const englishBody = <Content components={mdxComponents} />;
+
   return (
     <ArticleLayout item={item} prev={prev} next={next}>
-      <Content components={mdxComponents} />
+      <LocalizedMDX slug={params.slug} englishContent={englishBody} />
     </ArticleLayout>
   );
 }

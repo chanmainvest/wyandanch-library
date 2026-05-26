@@ -4,6 +4,7 @@ import { NavBar } from '@/components/NavBar';
 import { Footer } from '@/components/Footer';
 import { I18nProvider } from '@/lib/i18n/context';
 import './globals.css';
+import 'katex/dist/katex.min.css';
 
 const inter = Inter({
   subsets: ['latin'],

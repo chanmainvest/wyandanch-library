@@ -13,8 +13,10 @@ interface LevelCardProps {
 export function LevelCard({ level, delay = 0 }: LevelCardProps) {
   const [expanded, setExpanded] = useState(false);
   const { t } = useI18n();
-  const itemLabel =
-    level.items.length === 1 ? t('curriculum.item') : t('curriculum.items');
+
+  const levelTitle = t(`level.${level.number}.title`);
+  const levelDesc  = t(`level.${level.number}.desc`);
+  const itemLabel  = level.items.length === 1 ? t('curriculum.item') : t('curriculum.items');
 
   return (
     <div
@@ -26,13 +28,11 @@ export function LevelCard({ level, delay = 0 }: LevelCardProps) {
           <span className="level-card-number-text">{String(level.number).padStart(2, '0')}</span>
         </div>
         <div className="level-card-info">
-          <div className="level-card-title">{level.title}</div>
-          <div className="level-card-desc">{level.description}</div>
+          <div className="level-card-title">{levelTitle}</div>
+          <div className="level-card-desc">{levelDesc}</div>
         </div>
         <div className="level-card-meta">
-          <span className="level-card-count">
-            {level.items.length} {itemLabel}
-          </span>
+          <span className="level-card-count">{level.items.length} {itemLabel}</span>
           <span className="level-card-toggle">{expanded ? '\u2212' : '+'}</span>
         </div>
       </button>
