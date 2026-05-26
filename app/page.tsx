@@ -20,7 +20,7 @@ export default function Home() {
             <div className="hero-content">
               <div className="hero-fade hero-fade-1">
                 <Image
-                  src="/logo.png"
+                  src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ''}/logo.png`}
                   alt="Wyandanch"
                   width={80}
                   height={80}

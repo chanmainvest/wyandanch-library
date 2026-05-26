@@ -13,7 +13,7 @@ export function NavBar() {
       <div className="navbar-inner">
         <Link href="/" className="navbar-logo">
           <Image
-            src="/logo.png"
+            src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ''}/logo.png`}
             alt="Wyandanch"
             width={40}
             height={40}
