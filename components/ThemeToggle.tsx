@@ -1,8 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useI18n } from '@/lib/i18n/context';
 
 export function ThemeToggle() {
+  const { t } = useI18n();
   const [mounted, setMounted] = useState(false);
   const [isDark, setIsDark] = useState(true);
 
@@ -21,18 +23,13 @@ export function ThemeToggle() {
     localStorage.setItem('wl-theme', value);
   };
 
-  // Reserve space while hydrating to avoid layout shift
   if (!mounted) return <div className="theme-toggle-placeholder" aria-hidden />;
 
+  const label = isDark ? t('theme.toLight') : t('theme.toDark');
+
   return (
-    <button
-      className="theme-toggle"
-      onClick={toggle}
-      aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-      title={isDark ? 'Light mode' : 'Dark mode'}
-    >
+    <button className="theme-toggle" onClick={toggle} aria-label={label} title={label}>
       {isDark ? (
-        // Sun icon
         <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
           <circle cx="8" cy="8" r="3" fill="currentColor" />
           <path
@@ -43,12 +40,8 @@ export function ThemeToggle() {
           />
         </svg>
       ) : (
-        // Moon icon
         <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-          <path
-            d="M13.5 9A5.5 5.5 0 1 1 7 2.5a4 4 0 0 0 6.5 6.5z"
-            fill="currentColor"
-          />
+          <path d="M13.5 9A5.5 5.5 0 1 1 7 2.5a4 4 0 0 0 6.5 6.5z" fill="currentColor" />
         </svg>
       )}
     </button>

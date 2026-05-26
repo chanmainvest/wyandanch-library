@@ -1,11 +1,18 @@
+'use client';
+
 import Link from 'next/link';
-import { topics, getItemsByTopic } from '@/lib/curriculum';
+import { getItemsByTopic } from '@/lib/curriculum';
+import { useI18n } from '@/lib/i18n/context';
+import { useLocalizedCurriculum } from '@/lib/i18n/use-localized-curriculum';
 
 export function TopicBrowser() {
+  const { t } = useI18n();
+  const { topics, localizeItem } = useLocalizedCurriculum();
+
   return (
     <div className="topic-browser">
       {topics.map((topic) => {
-        const items = getItemsByTopic(topic.slug);
+        const items = getItemsByTopic(topic.slug).map((item) => localizeItem(item));
         return (
           <div key={topic.slug} className="topic-card">
             <div className="topic-card-title">{topic.title}</div>
@@ -17,7 +24,9 @@ export function TopicBrowser() {
                 </Link>
               ))}
             </div>
-            <div className="topic-card-count">{items.length} {items.length === 1 ? 'text' : 'texts'}</div>
+            <div className="topic-card-count">
+              {items.length} {items.length === 1 ? t('topic.text') : t('topic.texts')}
+            </div>
           </div>
         );
       })}

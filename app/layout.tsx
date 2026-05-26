@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { NavBar } from '@/components/NavBar';
 import { Footer } from '@/components/Footer';
+import { I18nProvider } from '@/lib/i18n/context';
 import './globals.css';
 
 const inter = Inter({
@@ -60,12 +61,14 @@ export default function RootLayout({
     <html lang="en" className={inter.variable}>
       <head>
         {/* Prevent flash of wrong theme before React hydrates */}
-        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('wl-theme'),dark=t!=='light';document.documentElement.setAttribute('data-theme',dark?'dark':'light');document.documentElement.style.backgroundColor=dark?'#0a0a0a':'#f5f5f5'}catch(e){}})()` }} />
+        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('wl-theme'),dark=t!=='light';document.documentElement.setAttribute('data-theme',dark?'dark':'light');document.documentElement.style.backgroundColor=dark?'#0a0a0a':'#f5f5f5';var l=localStorage.getItem('wl-lang');if(l)document.documentElement.setAttribute('lang',l)}catch(e){}})()` }} />
       </head>
       <body>
-        <NavBar />
-        <main>{children}</main>
-        <Footer />
+        <I18nProvider>
+          <NavBar />
+          <main>{children}</main>
+          <Footer />
+        </I18nProvider>
       </body>
     </html>
   );

@@ -1,63 +1,91 @@
 # AGENTS.md
 
-## Project Overview
+Guidance for automated coding agents working in this repository. **Setup, commands, stack versions, and publishing steps are in [README.md](README.md).** Locale fork steps are in [lib/i18n/README.md](lib/i18n/README.md).
 
-Wyandanch Library is a Next.js 14 static site for open source finance education. It presents a structured investing and quantitative finance curriculum with progressive levels, topical tracks, a reading queue, and MDX article pages.
+## Project constraints
 
-The app is intentionally static: `next.config.mjs` uses `output: 'export'` and unoptimized images, so changes should remain compatible with static export and GitHub Pages-style hosting.
+- Static site only: `output: 'export'` in `next.config.mjs`. No API routes, no server-only runtime, no request-time data fetching.
+- `basePath` is `/wyandanch-library` — links and assets must stay compatible with GitHub Pages project hosting.
+- **`docs/` is the GitHub Pages publish root** — static HTML/CSS/JS only. Never point `distDir` at `docs/`. Use `npm run export:docs` (see README) to populate `docs/` from `out/`.
+- Do not commit unless the user explicitly asks.
 
-## Stack
+## Repository changelog
 
-- Node.js >=22 (developed on v25.2.1). `@types/node` is pinned to `^22`.
-- Next.js App Router with React 18 and strict TypeScript.
-- MDX content through `@next/mdx`, `@mdx-js/react`, and `remark-gfm`.
-- Global styling in `app/globals.css`, built around a monochrome, terminal-inspired design system.
-- Path alias `@/*` maps to the repository root.
+Record of notable changes on the current feature work (agents should keep this section updated when they land substantive repo changes).
 
-## Important Paths
+### Static export and GitHub Pages (`docs/`)
 
-- `app/page.tsx` - home page and main landing experience.
-- `app/curriculum/page.tsx` - level-based curriculum view.
-- `app/track/[slug]/page.tsx` - track-specific curriculum pages.
-- `app/read/[slug]/page.tsx` - static reading pages loaded from MDX.
-- `app/reading-queue/page.tsx` - planned future readings.
-- `components/` - reusable UI and article/MDX presentation components.
-- `content/level-N/*.mdx` - reading content grouped by curriculum level.
-- `lib/curriculum.ts` - source of truth for tracks, topics, reading metadata, level grouping, and the reading queue.
-- `lib/mdx-map.ts` - explicit slug-to-MDX dynamic import map used by article pages.
-- `scripts/generate-og.mjs` - regenerates `public/og.svg` and `public/og.png`.
-- `scripts/generate-sitemap.mjs` - regenerates `public/sitemap.xml`.
+- Removed `distDir: 'docs'` from `next.config.mjs` (it had been writing Next.js build cache/server artifacts into `docs/` instead of a static site).
+- Default build output: `.next/` (cache, gitignored) and `out/` (static export, gitignored).
+- Added `scripts/export-static.mjs` and npm script `export:docs` — builds the app and copies `out/` → `docs/` plus `.nojekyll`.
+- Restored `docs/` as committed static HTML for github.io.
 
-## Commands
+### Internationalization (i18n)
 
-- Install dependencies with `npm install`.
-- Start local development with `npm run dev`.
-- Validate production/static-export behavior with `npm run build`. The static site is written to `docs/` (configured via `distDir: 'docs'` in `next.config.mjs`), not the default `out/`.
-- Run `npm run lint` when useful, but be aware this repo currently relies on Next's lint command and may need script maintenance if the installed Next version changes.
-- After changing the logo or Open Graph image, run `node scripts/generate-og.mjs`.
-- After adding, removing, or renaming public routes/readings, run `node scripts/generate-sitemap.mjs` and keep its article list in sync.
+- Added `lib/i18n/` — locale registry, translation dictionaries, `I18nProvider`, `useLocalizedCurriculum`, fallback chains.
+- Locales: `en`, `zh-HK`, `zh-TW`, `zh-CN` with navbar flag selector (`components/LangSelector.tsx`).
+- UI strings in `lib/i18n/translations/*.ts`; reading metadata overrides in `lib/i18n/translations/readings/*.ts`.
+- `lib/mdx-map.ts` extended for optional per-locale MDX bodies.
+- Maintainer scripts: `scripts/generate-reading-translations.mjs`, `scripts/extract-readings.mjs`.
 
-## Content Editing Rules
+### UI refactor (client shells + layout)
 
-- Treat `lib/curriculum.ts` as the canonical metadata source for readings. A reading's `slug`, `title`, `author`, `level`, `tracks`, `topics`, `description`, and `keyConcepts` live there.
-- When adding a published reading, add the metadata entry to `allItems`, add the matching MDX file under `content/level-N/`, and add the slug import to `lib/mdx-map.ts`.
-- Keep slugs consistent across `allItems`, MDX filenames, `lib/mdx-map.ts`, and `scripts/generate-sitemap.mjs`.
-- If reading counts are shown in metadata, copy, scripts, or generated assets, update them when the curriculum changes.
-- Use original summaries, notes, and analysis. Do not paste copyrighted book or article text except for brief, necessary, attributed excerpts.
-- Prefer existing MDX presentation helpers from `components/MDXComponents.tsx`, especially `Callout` and `KeyConcept`, before creating new article-only components.
+- Extracted client-heavy page UI into dedicated components: `HomeHero`, `HomeSections`, `CurriculumPageClient`, `TrackPageClient`, `ReadingQueuePageClient`, `ArticleComingSoon`.
+- Updated `NavBar`, `Footer`, `ThemeToggle`, `ArticleLayout`, cards, and topic/track browsers for i18n and theme behavior.
+- Theme/language bootstrapped in `app/layout.tsx` (inline script for flash-free `data-theme` / `lang`).
 
-## UI And Code Style
+### Other
 
-- Preserve the dark monochrome terminal aesthetic unless the user explicitly asks for a redesign.
-- Reuse existing components such as `Panel`, `PanelHeader`, `TerminalWindow`, `ScrollReveal`, `LevelCard`, and `ReadingQueueCard` before introducing new component patterns.
-- Keep route components focused on composition and data selection; place reusable UI in `components/` and shared curriculum logic in `lib/`.
-- Keep pages static-export safe. Avoid API routes, server-only runtime assumptions, request-time data fetching, or environment-dependent rendering unless the deployment model changes.
-- Use TypeScript types from `lib/curriculum.ts` for tracks, topics, and curriculum items instead of duplicating string unions.
-- Make styling changes in `app/globals.css` consistent with the existing CSS custom properties and responsive patterns.
+- `tsconfig.json` — removed erroneous `docs/types/**/*.ts` include (build types live under `.next/types/`).
+- `AGENTS.md` / `README.md` — split human technical docs vs agent rules; this changelog.
 
-## Validation Expectations
+## Important paths
 
-- For content-only MDX edits, inspect the affected article locally when practical.
-- For metadata, routing, component, or styling changes, run `npm run build` before finishing.
-- If build or lint cannot be run, explain why in the final response and name the remaining risk.
-- Do not commit changes unless the user explicitly asks for a commit.
+| Path | Role |
+|------|------|
+| `app/page.tsx` | Home |
+| `app/curriculum/page.tsx` | Level-based curriculum |
+| `app/track/[slug]/page.tsx` | Track pages |
+| `app/read/[slug]/page.tsx` | MDX articles |
+| `app/reading-queue/page.tsx` | Queue |
+| `lib/curriculum.ts` | Canonical metadata, tracks, queue |
+| `lib/mdx-map.ts` | Slug → MDX imports |
+| `lib/i18n/` | Locales and localization |
+| `content/level-N/*.mdx` | Article bodies |
+| `components/` | Shared UI and MDX presentation |
+| `scripts/export-static.mjs` | Build → `docs/` for Pages |
+| `scripts/generate-sitemap.mjs` | `public/sitemap.xml` |
+| `scripts/generate-og.mjs` | OG images |
+| `docs/` | Published static site (generated; commit after export) |
+
+## Content editing rules
+
+- `lib/curriculum.ts` is canonical for `slug`, `title`, `author`, `level`, `tracks`, `topics`, `description`, `keyConcepts`.
+- New reading: `allItems` entry + `content/level-N/<slug>.mdx` + `lib/mdx-map.ts` + sitemap script list.
+- Keep slugs aligned across curriculum, MDX filenames, `mdx-map`, and `generate-sitemap.mjs`.
+- Update reading counts in copy/scripts when the curriculum size changes.
+- Original summaries only; no pasted copyrighted book text except brief attributed excerpts.
+- Prefer `components/MDXComponents.tsx` (`Callout`, `KeyConcept`) before new article-only components.
+- For new UI copy, add translation keys for all supported locales or accept English fallback.
+
+## UI and code style
+
+- Preserve the dark monochrome terminal aesthetic unless the user requests a redesign.
+- Reuse `Panel`, `PanelHeader`, `TerminalWindow`, `ScrollReveal`, `LevelCard`, `ReadingQueueCard`, existing client page shells.
+- Route files: composition and data selection; reusable UI in `components/`, logic in `lib/`.
+- Types from `lib/curriculum.ts` — do not duplicate track/topic unions.
+- Style via `app/globals.css` custom properties and existing responsive patterns.
+
+## Validation
+
+- MDX-only edits: preview the article when practical.
+- Metadata, routing, components, styling, i18n: run `npm run build` or `npm run export:docs` before finishing.
+- If build/lint cannot run, state the risk in the final response.
+- After logo/OG changes: `node scripts/generate-og.mjs`.
+- After route/slug changes: `node scripts/generate-sitemap.mjs` and sync its article list.
+
+## When you change the repo
+
+1. Implement the change following the rules above.
+2. Append or update the **Repository changelog** in this file if the change is user-visible or affects agent workflow (new scripts, folders, conventions, major features).
+3. Update **README.md** if humans need new setup, commands, or layout explanation.

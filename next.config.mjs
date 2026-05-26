@@ -6,7 +6,6 @@ const basePath = '/wyandanch-library';
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'export',
-  distDir: 'docs',
   basePath,
   images: { unoptimized: true },
   pageExtensions: ['ts', 'tsx', 'md', 'mdx'],

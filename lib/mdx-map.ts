@@ -1,8 +1,10 @@
 import type { ComponentType } from 'react';
+import type { LocaleCode } from '@/lib/i18n/types';
 
 type MDXModule = { default: ComponentType<any> };
 
-const mdxMap: Record<string, () => Promise<MDXModule>> = {
+/** English MDX articles (default). Keys are reading slugs. */
+const mdxMapEn: Record<string, () => Promise<MDXModule>> = {
   'menger-principles-of-economics': () => import('@/content/level-1/menger-principles-of-economics.mdx'),
   'stigler-theory-of-price': () => import('@/content/level-1/stigler-theory-of-price.mdx'),
   'smith-wealth-of-nations': () => import('@/content/level-1/smith-wealth-of-nations.mdx'),
@@ -45,13 +47,32 @@ const mdxMap: Record<string, () => Promise<MDXModule>> = {
   'quasi-random-number-generation': () => import('@/content/level-8/quasi-random-number-generation.mdx'),
 };
 
-export async function loadMDXContent(slug: string): Promise<ComponentType<any> | null> {
-  const loader = mdxMap[slug];
-  if (!loader) return null;
-  try {
-    const mod = await loader();
-    return mod.default;
-  } catch {
-    return null;
+/**
+ * Locale-specific MDX loaders. Forks add translated articles here, e.g.:
+ *   'zh-CN': { 'menger-principles-of-economics': () => import('@/content/zh-CN/level-1/...') }
+ * Missing locale or slug falls back to English.
+ */
+const localeMdxMap: Record<LocaleCode, Record<string, () => Promise<MDXModule>>> = {
+  en: mdxMapEn,
+};
+
+const DEFAULT_MDX_LOCALE: LocaleCode = 'en';
+
+export async function loadMDXContent(
+  slug: string,
+  locale: LocaleCode = DEFAULT_MDX_LOCALE
+): Promise<ComponentType<any> | null> {
+  const chain = [locale, DEFAULT_MDX_LOCALE];
+  for (const code of chain) {
+    const map = localeMdxMap[code];
+    const loader = map?.[slug];
+    if (!loader) continue;
+    try {
+      const mod = await loader();
+      return mod.default;
+    } catch {
+      continue;
+    }
   }
+  return null;
 }

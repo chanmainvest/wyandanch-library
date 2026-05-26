@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { allItems, getItemBySlug, getAdjacentItems } from '@/lib/curriculum';
 import { ArticleLayout } from '@/components/ArticleLayout';
+import { ArticleComingSoon } from '@/components/ArticleComingSoon';
 import { mdxComponents } from '@/components/MDXComponents';
 import { loadMDXContent } from '@/lib/mdx-map';
 
@@ -44,9 +45,7 @@ export default async function ReadPage({ params }: { params: { slug: string } })
   if (!Content) {
     return (
       <ArticleLayout item={item} prev={prev} next={next}>
-        <p className="mdx-p" style={{ fontStyle: 'italic', color: 'var(--text-muted)' }}>
-          Content coming soon. This reading is part of the Wyandanch Library curriculum.
-        </p>
+        <ArticleComingSoon />
       </ArticleLayout>
     );
   }
