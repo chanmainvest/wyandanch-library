@@ -57,7 +57,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={inter.variable} style={{ backgroundColor: '#0a0a0a' }}>
+    <html lang="en" className={inter.variable}>
+      <head>
+        {/* Prevent flash of wrong theme before React hydrates */}
+        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('wl-theme'),dark=t!=='light';document.documentElement.setAttribute('data-theme',dark?'dark':'light');document.documentElement.style.backgroundColor=dark?'#0a0a0a':'#f5f5f5'}catch(e){}})()` }} />
+      </head>
       <body>
         <NavBar />
         <main>{children}</main>

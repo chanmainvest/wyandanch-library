@@ -5,6 +5,7 @@ import remarkGfm from 'remark-gfm';
 const nextConfig = {
   output: 'export',
   distDir: 'docs',
+  basePath: '/wyandanch-library',
   images: { unoptimized: true },
   pageExtensions: ['ts', 'tsx', 'md', 'mdx'],
 };
