@@ -4,6 +4,7 @@ import remarkGfm from 'remark-gfm';
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'export',
+  distDir: 'docs',
   images: { unoptimized: true },
   pageExtensions: ['ts', 'tsx', 'md', 'mdx'],
 };
