@@ -4,12 +4,12 @@ const base = 'https://wyandanchlibrary.com';
 const today = new Date().toISOString().split('T')[0];
 
 const articles = [
-  'menger-principles-of-economics', 'stigler-theory-of-price', 'business-history-of-finance',
+  'menger-principles-of-economics', 'stigler-theory-of-price', 'smith-wealth-of-nations', 'business-history-of-finance',
   'buffett-shareholder-letters', 'fisher-common-stocks', 'marks-oaktree-memos',
   'livermore-reminiscences', 'druckenmiller-principles', 'graham-value-investing',
   'engines-that-move-markets', 'lynch-one-up-on-wall-street', 'schwager-market-wizards',
   'tudor-jones-principles', 'taleb-incerto', 'keynes-general-theory', 'hayek-prices-and-production',
-  'soros-reflexivity', 'behavioral-finance', 'damodaran-little-book-valuation',
+  'soros-reflexivity', 'behavioral-finance', 'friedman-monetary-theory', 'damodaran-little-book-valuation',
   'growth-investing-principles', 'technical-analysis', 'quant-foundations',
   'econometrics-and-fx', 'garch-101', 'portfolio-construction',
   'theory-to-application', 'systematic-indices', 'gappy-lecture-1-alpha-research',

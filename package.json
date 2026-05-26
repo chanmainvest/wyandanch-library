@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "export:docs": "node scripts/export-static.mjs",
     "start": "next start",
     "lint": "next lint"
   },
@@ -17,11 +18,13 @@
     "next": "14.2.35",
     "react": "^18",
     "react-dom": "^18",
-    "remark-gfm": "^4"
+    "rehype-katex": "^7.0.1",
+    "remark-gfm": "^4",
+    "remark-math": "^6.0.0"
   },
   "devDependencies": {
     "@types/mdx": "^2",
-    "@types/node": "^20",
+    "@types/node": "^22",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "sharp": "^0.34.5",

@@ -1,7 +1,11 @@
+'use client';
+
 import Link from 'next/link';
-import { tracks } from '@/lib/curriculum';
+import { useLocalizedCurriculum } from '@/lib/i18n/use-localized-curriculum';
 
 export function TrackPicker() {
+  const { tracks } = useLocalizedCurriculum();
+
   return (
     <div className="track-picker">
       {tracks.map((track) => (
