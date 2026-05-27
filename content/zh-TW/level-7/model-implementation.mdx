@@ -1,0 +1,104 @@
+## 概覽
+
+模型實作（Model Implementation）探討如何將量化金融模型從研究階段轉化為可靠、可維護的生產代碼。本文涵蓋Python資料管道的最佳實踐、回溯測試框架的設計選擇、向量化與事件驅動架構的比較，以及生產環境中代碼品質和正確性的保障方法。
+
+## 回溯測試框架的架構選擇
+
+回溯測試框架有兩種主要的設計範式：
+
+### 向量化（Vectorized）回測
+
+**設計**：以整個時間序列為單位進行運算，利用NumPy/pandas的矩陣運算批量計算所有時間點的信號、回報和統計量。
+
+**優點**：
+- 計算速度極快（利用BLAS等底層線性代數庫）
+- 代碼簡潔，適合研究和快速原型開發
+- 易於在多個策略之間進行批量比較
+
+**缺點**：
+- 難以精確模擬逐筆訂單的執行邏輯（填單優先序、部分成交等）
+- 容易引入微妙的**前向偏誤**：向量操作中不小心使用了未來時點的資料（如`df['signal'].shift(-1)`忘記調整方向）
+- 難以處理複雜的訂單類型和執行規則
+
+```python
+# 向量化回測示例（pandas）
+returns = prices.pct_change()
+signal = prices.rolling(12).mean() / prices.rolling(26).mean() - 1  # 動量信號
+# 注意：信號必須向後shift一個周期，避免前向偏誤
+positions = signal.shift(1).apply(lambda x: np.sign(x))
+strategy_returns = positions * returns
+sharpe = strategy_returns.mean() / strategy_returns.std() * np.sqrt(252)
+```
+
+### 事件驅動（Event-Driven）回測
+
+**設計**：模擬真實的市場微觀結構——每個「事件」（市場資料更新、訂單填單、資產組合更新）按時間序列觸發相應的處理邏輯。
+
+**優點**：
+- 更真實地模擬交易邏輯，包括訂單生成、風控檢查、倉位管理
+- 適合高頻和中頻策略的精確模擬
+- 更接近生產代碼的結構，減少從研究到生產的轉換成本
+
+**缺點**：
+- 代碼複雜度高，開發時間長
+- 計算速度相對較慢（逐事件處理無法完全向量化）
+
+常用的事件驅動框架：zipline（Quantopian開源）、backtrader、Lean（QuantConnect開源）
+
+## Python資料管道的最佳實踐
+
+**資料存取層（Data Access Layer）**：
+```python
+# 好的實踐：透過接口抽象資料來源
+class PriceDataFetcher:
+    def get_prices(self, ticker: str, start: date, end: date) -> pd.DataFrame:
+        ...
+
+# 糟糕的實踐：直接在策略邏輯中硬編碼資料存取
+prices = pd.read_csv(f"data/{ticker}.csv")  # 耦合太緊，難以測試和切換資料源
+```
+
+**避免前向偏誤的技術措施**：
+1. 所有信號計算完成後，統一進行 `.shift(1)` 或 `.shift(periods=1)` 操作，確保信號使用的是「昨天已知的資料」
+2. 使用「截止時間（as-of）」查詢：確保查詢基本面資料時，只返回在指定時點已公告的資料（point-in-time）
+3. 設立回測日期邊界：確保訓練集和測試集之間有清晰的時間分界線，且測試集資料不參與信號開發
+
+**記憶體效率與性能**：
+- 使用適當的資料類型（`float32` vs `float64`，`int16` vs `int64`）減少記憶體佔用
+- 對大型資料集使用 `pandas` 的 `category` 類型存儲代碼（如股票代碼）
+- 在大規模橫截面計算中，`numpy` 直接操作往往比 `pandas` 快3-10倍
+
+## 代碼品質和測試
+
+**單元測試（Unit Tests）**的重要性在量化代碼中尤其突出，因為：
+- 金融計算的錯誤往往無法直觀察覺（代碼運行無誤，但結果悄悄錯誤）
+- 回溯測試結果是「懲罰不足夠的測試」——帶有前向偏誤的代碼看起來回報「好得驚人」
+
+```python
+# 測試殖利率計算沒有前向偏誤
+def test_signal_no_lookahead():
+    prices = pd.Series([100, 102, 101, 105, 103])
+    signal = compute_momentum_signal(prices)
+    # 驗證：第0個信號應為NaN（還沒有足夠的歷史）
+    # 驗證：第1個信號只能使用第0個時點及之前的資料
+    assert pd.isna(signal.iloc[0])
+    ...
+```
+
+## 重點整理
+
+- 向量化回測：速度快，代碼簡潔，適合研究；但容易引入前向偏誤，難以精確模擬執行邏輯
+- 事件驅動回測：更真實模擬交易邏輯；代碼複雜，速度較慢
+- 前向偏誤的防範：統一使用 `.shift(1)`，使用point-in-time資料庫，清晰的時間邊界
+- 資料抽象層：透過接口抽象資料存取，使代碼易於測試和切換資料源
+- 單元測試是量化代碼品質的保障，特別是針對前向偏誤的回歸測試
+- 從研究到生產的轉換成本：事件驅動框架可以減少，但永遠無法消除
+
+## 延伸閱讀
+
+- [理論到應用](/read/theory-to-application) — 量化研究到生產系統的完整轉化流程概覽
+- [第三講：因子評估](/read/gappy-lecture-3-factor-evaluation) — 嚴謹的因子評估，包括步行前向測試
+- [量化基礎](/read/quant-foundations) — Python/pandas在量化分析中的應用
+
+---
+*本文持續更新。歡迎透過 [GitHub](https://github.com/NickNemo17/wyandanch-library) 貢獻。*

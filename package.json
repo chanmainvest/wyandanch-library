@@ -5,8 +5,7 @@
   "license": "SEE LICENSE IN LICENSE",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "export:docs": "node scripts/export-static.mjs",
+    "build": "node scripts/export-static.mjs",
     "start": "next start",
     "lint": "next lint"
   },

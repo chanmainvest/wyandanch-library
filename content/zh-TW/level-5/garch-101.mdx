@@ -1,0 +1,78 @@
+## 概覽
+
+GARCH（Generalized Autoregressive Conditional Heteroscedasticity，廣義自迴歸條件異方差）模型是金融時間序列分析中最重要的波動率建模工具，由提姆·博萊斯勒夫（Tim Bollerslev）在1986年基於恩格爾（Robert Engle，2003年諾貝爾獎）的ARCH模型發展而來。GARCH模型捕捉了金融資產回報的兩個核心特徵：波動率叢集（volatility clustering）和厚尾分布（fat tails）。
+
+## 為何需要GARCH：金融波動率的特性
+
+標準的統計假設認為，時間序列的誤差項具有固定的方差（同方差性）。但金融資產的日回報率顯示出截然不同的模式：
+
+**波動率叢集**：大的波動往往接在大的波動後面，小的波動接在小的波動後面。1987年股市崩盤後的高波動期、2008年金融危機、2020年疫情衝擊，都表現出這種「波動率引起更多波動率」的自相關性。
+
+**厚尾分布**：金融回報的極端事件（大漲或大跌）比常態分布預測的更頻繁，正尾和負尾都「更厚」。這使得以常態分布為基礎的風險模型（如傳統VaR）系統性地低估了尾部風險。
+
+## ARCH(q)模型
+
+恩格爾的ARCH(q)模型允許條件方差隨時間變化，取決於過去q期的殘差平方：
+
+$$\sigma_t^2 = \omega + \sum_{i=1}^{q} \alpha_i \varepsilon_{t-i}^2$$
+
+其中：
+- $\sigma_t^2$：t時期的條件方差（波動率的平方）
+- $\omega > 0$：常數項（長期平均方差的貢獻）
+- $\alpha_i \geq 0$：過去殘差的ARCH效應係數
+- $\varepsilon_{t-i}^2$：過去各期的殘差平方
+
+ARCH(q)的含義：今天的方差取決於過去q天的殘差——如果過去幾天有大的衝擊（無論方向），今天的預期波動率就更高。
+
+## GARCH(p, q)模型
+
+博萊斯勒夫的GARCH(p, q)進一步加入了過去p期條件方差的依賴，大幅提高了模型的靈活性，同時減少了需要估計的參數數量：
+
+$$\sigma_t^2 = \omega + \sum_{i=1}^{q} \alpha_i \varepsilon_{t-i}^2 + \sum_{j=1}^{p} \beta_j \sigma_{t-j}^2$$
+
+最常用的規格是GARCH(1,1)：
+
+$$\sigma_t^2 = \omega + \alpha \varepsilon_{t-1}^2 + \beta \sigma_{t-1}^2$$
+
+參數含義：
+- $\alpha$（ARCH係數）：衡量近期衝擊對波動率的即時影響
+- $\beta$（GARCH係數）：衡量波動率的持續性（慣性）
+- $\alpha + \beta < 1$：確保模型平穩；$\alpha + \beta$ 越接近1，波動率衝擊消散得越慢
+
+## GARCH模型的延伸
+
+**EGARCH（指數GARCH）**：允許正面和負面衝擊對波動率有不對稱的影響。金融市場中，負面衝擊（下跌）往往比同等規模的正面衝擊引起更大的波動率上升——這稱為**槓桿效應**（leverage effect）。
+
+**GJR-GARCH（非對稱GARCH）**：透過添加指示函數，直接建模下行衝擊的額外波動率貢獻：
+
+$$\sigma_t^2 = \omega + \alpha \varepsilon_{t-1}^2 + \gamma \varepsilon_{t-1}^2 \mathbf{1}_{\varepsilon_{t-1}<0} + \beta \sigma_{t-1}^2$$
+
+**DCC-GARCH（動態條件相關）**：允許多個資產之間的相關係數隨時間變化，適用於投資組合風險管理中的多變量分析。
+
+## 在風險管理中的應用
+
+GARCH模型在金融風險管理中有廣泛應用：
+
+**VaR計算**：利用GARCH估計的條件波動率計算每日風險值。在高波動率環境中，GARCH VaR自動提高風險估計值；在低波動率環境中，相應降低估計值——比靜態的固定VaR更能反映真實風險。
+
+**期權定價**：GARCH模型可以用於生成更符合市場觀察的波動率預測，改進Black-Scholes模型的固定波動率假設。
+
+**波動率交易**：透過GARCH預測短期波動率，與市場隱含波動率（IV）比較，尋找統計套利機會。
+
+## 重點整理
+
+- 金融回報率的波動率叢集和厚尾特性，使傳統常態分布假設不適用
+- ARCH模型允許條件方差取決於過去殘差；GARCH進一步加入過去方差的依賴，更有效率
+- GARCH(1,1)是實踐中最常用的規格：$\sigma_t^2 = \omega + \alpha\varepsilon_{t-1}^2 + \beta\sigma_{t-1}^2$
+- $\alpha + \beta$ 衡量波動率衝擊的持續性；接近1意味著波動率衝擊消散緩慢
+- EGARCH和GJR-GARCH捕捉了槓桿效應：負面衝擊對波動率的影響大於正面衝擊
+- GARCH在VaR計算、期權定價和波動率交易中有廣泛的實際應用
+
+## 延伸閱讀
+
+- [隨機波動率模型](/read/stochastic-volatility-models) — GARCH的連續時間延伸和替代框架
+- [計量經濟學與外匯](/read/econometrics-and-fx) — 時間序列分析的更廣泛脈絡
+- [量化基礎](/read/quant-foundations) — GARCH所需的概率論和統計學基礎
+
+---
+*本文持續更新。歡迎透過 [GitHub](https://github.com/NickNemo17/wyandanch-library) 貢獻。*

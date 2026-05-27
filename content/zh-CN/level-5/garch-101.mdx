@@ -1,0 +1,70 @@
+## 概览
+
+GARCH（Generalized Autoregressive Conditional Heteroscedasticity，广义自回归条件异方差）模型是金融时间序列分析中最重要的波动率建模工具，由蒂姆·博莱斯勒夫（Tim Bollerslev）在1986年基于恩格尔（Robert Engle，2003年诺贝尔奖）的ARCH模型发展而来。GARCH模型捕捉了金融资产回报的两个核心特征：波动率丛集（volatility clustering）和厚尾分布（fat tails）。
+
+## 为何需要GARCH：金融波动率的特性
+
+标准的统计假设认为，时间序列的误差项具有固定的方差（同方差性）。但金融资产的日回报率显示出截然不同的模式：
+
+**波动率丛集**：大的波动往往接在大的波动后面，小的波动接在小的波动后面。1987年股市崩盘后的高波动期、2008年金融危机、2020年疫情冲击，都表现出这种「波动率引起更多波动率」的自相关性。
+
+**厚尾分布**：金融回报的极端事件（大涨或大跌）比正态分布预测的更频繁，正尾和负尾都「更厚」。这使得以正态分布为基础的风险模型（如传统VaR）系统性地低估了尾部风险。
+
+## ARCH(q)模型
+
+恩格尔的ARCH(q)模型允许条件方差随时间变化，取决于过去q期的残差平方：
+
+$$\sigma_t^2 = \omega + \sum_{i=1}^{q} \alpha_i \varepsilon_{t-i}^2$$
+
+ARCH(q)的含义：今天的方差取决于过去q天的残差——如果过去几天有大的冲击（无论方向），今天的预期波动率就更高。
+
+## GARCH(p, q)模型
+
+博莱斯勒夫的GARCH(p, q)进一步加入了过去p期条件方差的依赖，大幅提高了模型的灵活性：
+
+$$\sigma_t^2 = \omega + \sum_{i=1}^{q} \alpha_i \varepsilon_{t-i}^2 + \sum_{j=1}^{p} \beta_j \sigma_{t-j}^2$$
+
+最常用的规格是GARCH(1,1)：
+
+$$\sigma_t^2 = \omega + \alpha \varepsilon_{t-1}^2 + \beta \sigma_{t-1}^2$$
+
+参数含义：
+- $\alpha$（ARCH系数）：衡量近期冲击对波动率的即时影响
+- $\beta$（GARCH系数）：衡量波动率的持续性（惯性）
+- $\alpha + \beta < 1$：确保模型平稳；$\alpha + \beta$ 越接近1，波动率冲击消散得越慢
+
+## GARCH模型的延伸
+
+**EGARCH（指数GARCH）**：允许正面和负面冲击对波动率有不对称的影响。金融市场中，负面冲击（下跌）往往比同等规模的正面冲击引起更大的波动率上升——这称为**杠杆效应**（leverage effect）。
+
+**GJR-GARCH（非对称GARCH）**：通过添加指示函数，直接建模下行冲击的额外波动率贡献：
+
+$$\sigma_t^2 = \omega + \alpha \varepsilon_{t-1}^2 + \gamma \varepsilon_{t-1}^2 \mathbf{1}_{\varepsilon_{t-1}<0} + \beta \sigma_{t-1}^2$$
+
+**DCC-GARCH（动态条件相关）**：允许多个资产之间的相关系数随时间变化，适用于投资组合风险管理中的多变量分析。
+
+## 在风险管理中的应用
+
+**VaR计算**：利用GARCH估计的条件波动率计算每日风险值。在高波动率环境中，GARCH VaR自动提高风险估计值；在低波动率环境中，相应降低估计值——比静态的固定VaR更能反映真实风险。
+
+**期权定价**：GARCH模型可以用于生成更符合市场观察的波动率预测，改进Black-Scholes模型的固定波动率假设。
+
+**波动率交易**：通过GARCH预测短期波动率，与市场隐含波动率（IV）比较，寻找统计套利机会。
+
+## 重点整理
+
+- 金融回报率的波动率丛集和厚尾特性，使传统正态分布假设不适用
+- ARCH模型允许条件方差取决于过去残差；GARCH进一步加入过去方差的依赖，更有效率
+- GARCH(1,1)是实践中最常用的规格：$\sigma_t^2 = \omega + \alpha\varepsilon_{t-1}^2 + \beta\sigma_{t-1}^2$
+- $\alpha + \beta$ 衡量波动率冲击的持续性；接近1意味着波动率冲击消散缓慢
+- EGARCH和GJR-GARCH捕捉了杠杆效应：负面冲击对波动率的影响大于正面冲击
+- GARCH在VaR计算、期权定价和波动率交易中有广泛的实际应用
+
+## 延伸阅读
+
+- [随机波动率模型](/read/stochastic-volatility-models) — GARCH的连续时间延伸和替代框架
+- [计量经济学与外汇](/read/econometrics-and-fx) — 时间序列分析的更广泛脉络
+- [量化基础](/read/quant-foundations) — GARCH所需的概率论和统计学基础
+
+---
+*本文持续更新。欢迎通过 [GitHub](https://github.com/NickNemo17/wyandanch-library) 贡献。*
