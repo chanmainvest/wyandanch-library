@@ -60,6 +60,16 @@ let rewriteCount = 0;
     // /wyandanch-library  (no trailing slash, e.g. canonical href)  →  .  or  ..
     const escapedBase = basePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     html = html.replace(new RegExp(escapedBase + '(?=["\'])', 'g'), prefix.replace(/\/$/, '') || '.');
+    // href="." → href="./index.html", href=".." → href="../index.html"
+    // (bare directory refs won't auto-load index.html via file://)
+    html = html.replace(/href="(\.\.?)"/g, (_, dots) => `href="${dots}/index.html"`);
+    // href="./track/quantitative" → href="./track/quantitative.html"
+    // Add .html to relative hrefs that have no file extension in the last segment.
+    html = html.replace(/href="(\.\.?\/[^"#?]*[^/#?])"/g, (match, path) => {
+      const lastPart = path.split('/').pop() || '';
+      if (/\.[a-zA-Z0-9]{1,5}$/.test(lastPart)) return match; // already has extension
+      return `href="${path}.html"`;
+    });
     writeFileSync(full, html, 'utf8');
     rewriteCount++;
   }
