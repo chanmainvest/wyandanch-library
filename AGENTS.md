@@ -28,6 +28,16 @@ Record of notable changes on the current feature work (agents should keep this s
 - `lib/mdx-map.ts` extended for optional per-locale MDX bodies.
 - Maintainer scripts: `scripts/generate-reading-translations.mjs`, `scripts/extract-readings.mjs`.
 
+### Chinese locale translation policy
+
+**The three Chinese locales (`zh-HK`, `zh-TW`, `zh-CN`) must each be translated independently from the English source. Do NOT derive one from another by character substitution or conversion.**
+
+- Cantonese Hong Kong (`zh-HK`): Traditional characters, Cantonese vocabulary and phrasing (e.g. 嘅, 咁, 係), formal written register used in HK financial press.
+- Taiwan Mandarin (`zh-TW`): Traditional characters, Taiwan-specific financial terminology and idioms (e.g. 股市 vocabulary preferred in TW press, 您 for formal address).
+- Mainland Mandarin (`zh-CN`): Simplified characters, PRC financial terminology and phrasing (e.g. 股份, 证券 conventions from mainland press).
+
+Word choice, tone, and style differ substantially across these three. Character conversion (e.g. running a Simplified→Traditional mapper on zh-CN to produce zh-HK) produces broken, unnatural text and must **never** be used as a shortcut. Always translate each locale fresh from English.
+
 ### UI refactor (client shells + layout)
 
 - Extracted client-heavy page UI into dedicated components: `HomeHero`, `HomeSections`, `CurriculumPageClient`, `TrackPageClient`, `ReadingQueuePageClient`, `ArticleComingSoon`.

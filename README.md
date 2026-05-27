@@ -2,8 +2,8 @@
 
 Free, open-source curriculum for learning investing and quantitative finance—from first principles through practitioner and quant topics. The site is a static publication: curriculum browser, topical tracks, reading queue, and MDX study notes for each reading.
 
-**Live site:** [wyandanchlibrary.com](https://wyandanchlibrary.com)  
-**GitHub Pages (project site):** served from the [`docs/`](docs/) folder on the default branch.
+**Live site (English original):** [wyandanchlibrary.com](https://wyandanchlibrary.com)  
+**Chinese translated site (GitHub Pages):** [chanmainvest.github.io/wyandanch-library](https://chanmainvest.github.io/wyandanch-library/) — served from the [`docs/`](docs/) folder on the `master` branch of this repo.
 
 ---
 
